@@ -1,4 +1,4 @@
-name: MinigameCore
+name: Bulb
 version: '${version}'
-main: net.pulga22.minigamecore.MinigameCore
+main: net.pulga22.bulb.Bulb
 api-version: '1.20'
