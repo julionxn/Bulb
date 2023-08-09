@@ -1,0 +1,4 @@
+name: MinigameCore
+version: '${version}'
+main: net.pulga22.minigamecore.MinigameCore
+api-version: '1.20'
