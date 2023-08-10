@@ -54,6 +54,9 @@ import java.util.logging.Logger;
  * </div>
  * <p>It has several methods that are <b>recommended</b> to be overridden to perform actions on certain events of the game instance:</p>
  * <li>
+ *     <b>{@link #onNew()}</b> triggers when a game is first created.
+ * </li>
+ * <li>
  *     <b>{@link #onPreparation()}</b> triggers when a game is prepared. <br>
  *     A game instance can be created but no prepared.<br>
  *     Players are only allowed to enter the game instance when it is prepared.<br>
@@ -104,7 +107,7 @@ public class GameInstance<T extends Plugin> {
     private final GameManager<? extends GameInstance<T>, T> gameManager;
     private GameState gameState = GameState.NONE;
     private boolean prepared = false;
-    protected final PlayerManager<T> playerManager;
+    private final PlayerManager<T> playerManager;
     private final GameScoreboard scoreboard;
     private final int ID;
     public final String gameName;
