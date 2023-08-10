@@ -9,7 +9,7 @@ import net.pulga22.bulb.core.score.GameScoreboard;
 import net.pulga22.bulb.core.score.GameScoreboardInfo;
 import net.pulga22.bulb.core.states.GameState;
 import net.pulga22.bulb.core.states.PlayerState;
-import net.pulga22.bulb.core.teams.TeamInfo;
+import net.pulga22.bulb.core.teams.TeamsInfo;
 import net.pulga22.bulb.core.worlds.WorldInstance;
 import net.pulga22.bulb.core.worlds.WorldOption;
 import org.bukkit.Bukkit;
@@ -46,7 +46,7 @@ import java.util.logging.Logger;
  * <br></div>
  * <div><p>Other methods do not need to be overwritten, however, it is possible to do so to determine other aspects about the game instance.</p>
  * <li>
- *     <b>{@link #getTeamsInfo(TeamInfo)}</b> It is used to determine certain parameters when establishing the teams of the players entering the game instance.
+ *     <b>{@link #getTeamsInfo(TeamsInfo)}</b> It is used to determine certain parameters when establishing the teams of the players entering the game instance.
  * </li>
  * <li>
  *     <b>{@link #initScoreboard(GameScoreboard)}</b> It is used to create and initialize components inside the scoreboard of the game instance.
@@ -113,13 +113,14 @@ public class GameInstance<T extends Plugin> {
     private final List<Player> queueToJoin = new ArrayList<>();
 
     public <K extends GameInstance<T>> GameInstance(T plugin, ConfigManager<T> configManager, GameManager<K, T> manager, String gameName, WorldOption worldOption, GameScoreboardInfo info, boolean prepareOnCreation) {
+        this.onNew();
         this.plugin = plugin;
         this.logger = plugin.getLogger();
         this.gameManager = manager;
         this.gameName = gameName;
         this.ID = manager.random.nextInt(Integer.MAX_VALUE);
-        TeamInfo<T> teamInfo = this.getTeamsInfo(new TeamInfo<>(configManager));
-        this.playerManager = new PlayerManager<>(getMaxPlayers(), teamInfo, configManager);
+        TeamsInfo<T> teamsInfo = this.getTeamsInfo(new TeamsInfo<>(configManager));
+        this.playerManager = new PlayerManager<>(getMaxPlayers(), teamsInfo, configManager);
         if (!info.empty()){
             this.scoreboard = new GameScoreboard(info, this.gameName);
             this.initScoreboard(this.scoreboard);
@@ -175,9 +176,9 @@ public class GameInstance<T extends Plugin> {
     /**
      * Used to set the teams info about the game. Return null to not use teams in this game.
      * <p><b>Intended to override.</b></p>
-     * @param teamInfo The teams' info.
+     * @param teamsInfo The teams' info.
      */
-    public TeamInfo<T> getTeamsInfo(TeamInfo<T> teamInfo){
+    public TeamsInfo<T> getTeamsInfo(TeamsInfo<T> teamsInfo){
         return null;
     }
 
@@ -187,6 +188,13 @@ public class GameInstance<T extends Plugin> {
      * @param gameScoreboard The Greeko Scoreboard of the game instance.
      */
     public void initScoreboard(GameScoreboard gameScoreboard){
+
+    }
+
+    /**
+     * Triggers before the instance is fully-created.
+     */
+    public void onNew(){
 
     }
 
@@ -230,7 +238,7 @@ public class GameInstance<T extends Plugin> {
             return PlayerState.PLAYING;
         }
         if (this.gameState == GameState.NONE){
-            this.logger.log(Level.SEVERE, "Game must be prepared first after try to join players.");
+            this.logger.log(Level.SEVERE, "Game must be prepared first after trying to join players.");
             return null;
         }
         if (this.scoreboard != null){

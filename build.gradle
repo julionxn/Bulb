@@ -2,9 +2,9 @@ plugins {
     id 'java'
 }
 
-jar {
-    destinationDirectory.set(file("C:\\Users\\pulga\\OneDrive\\Escritorio\\PAPER SERVER\\plugins"))
-  }
+//jar {
+ //   destinationDirectory.set(file("C:\\Users\\pulga\\OneDrive\\Escritorio\\PAPER SERVER\\plugins"))
+  //}
 
 
 group = 'net.pulga22'

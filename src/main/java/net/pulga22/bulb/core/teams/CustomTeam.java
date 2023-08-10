@@ -17,6 +17,11 @@ public class CustomTeam {
     private final ChatColor chatColor;
     private final String mcColor;
 
+    /**
+     * @param name The teamKey
+     * @param color The hexadecimal color ("#ff00ff")
+     * @param mcColor The minecraft color name.
+     */
     public CustomTeam(String name, String color, String mcColor) {
         this.name = name;
         this.color = parseColor(color);

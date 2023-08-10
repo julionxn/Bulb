@@ -9,25 +9,34 @@ import java.util.HashMap;
  * An auxiliary class that represents the information respective to a game instance about the teams.
  * @param <T> extends Plugin.
  */
-public class TeamInfo<T extends Plugin> {
+public class TeamsInfo<T extends Plugin> {
 
     private int teamCount = 0;
     private final HashMap<String, CustomTeam> allowedTeams = new HashMap<>();
     private TeamsDistribution teamsDistribution = TeamsDistribution.UNIFORM;
     private final ConfigManager<T> configManager;
 
-    public TeamInfo(ConfigManager<T> configManager) {
+    public TeamsInfo(ConfigManager<T> configManager) {
         this.configManager = configManager;
     }
 
+    /**
+     * @param count The maximum number of teams allowed within a game instance.
+     */
     public void setTeamCount(int count){
         this.teamCount = count;
     }
 
-    public void addAllowTeam(String teamName){
+    public void addAllowedTeam(String teamKey){
         HashMap<String, CustomTeam> teams = configManager.getTeams();
-        if (teams.containsKey(teamName)){
-            this.allowedTeams.put(teamName, teams.get(teamName));
+        if (teams.containsKey(teamKey) && this.allowedTeams.keySet().size() < this.teamCount + 1){
+            this.allowedTeams.put(teamKey, teams.get(teamKey));
+        }
+    }
+
+    public void addAllowedTeam(CustomTeam customTeam){
+        if (this.allowedTeams.keySet().size() < this.teamCount + 1){
+            this.allowedTeams.put(customTeam.getName(), customTeam);
         }
     }
 

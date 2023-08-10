@@ -16,6 +16,10 @@ public class TimerRunnable<T extends Plugin> extends BukkitRunnable {
 
     @Override
     public void run() {
+        if (this.timeLeft == -1){
+            cancel();
+            return;
+        }
         this.timeLeft--;
         if (this.timeLeft <= 0){
             cancel();

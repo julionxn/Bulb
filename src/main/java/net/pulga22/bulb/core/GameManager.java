@@ -125,7 +125,7 @@ public class GameManager<T extends GameInstance<K>, K extends Plugin> {
      * @param game The Game Instance.
      * @param <P> Plugin.
      */
-    protected  <P extends Plugin> void finishGame(GameInstance<P> game){
+    protected <P extends Plugin> void finishGame(GameInstance<P> game){
         if (game.getID() == this.availableGame.getID()){
             this.availableGame = null;
         }

@@ -3,7 +3,7 @@ package net.pulga22.bulb.core.players;
 import net.pulga22.bulb.core.config.ConfigManager;
 import net.pulga22.bulb.core.states.PlayerState;
 import net.pulga22.bulb.core.teams.CustomTeam;
-import net.pulga22.bulb.core.teams.TeamInfo;
+import net.pulga22.bulb.core.teams.TeamsInfo;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
@@ -25,7 +25,7 @@ public class PlayerManager<T extends Plugin> {
     private static final Random RANDOM = new Random();
     private final PlayersContainer playersContainer = new PlayersContainer();
     private final int maxPlayers;
-    private final TeamInfo<T> teamInfo;
+    private final TeamsInfo<T> teamsInfo;
     private boolean teamsGame;
     private final HashMap<String, CustomTeam> allowedTeams = new HashMap<>();
     private final HashMap<Player, String> teams = new HashMap<>();
@@ -33,32 +33,32 @@ public class PlayerManager<T extends Plugin> {
     private int uniformIndex = 0;
     private final ConfigManager<T> configManager;
 
-    public PlayerManager(int maxPlayers, TeamInfo<T> teamInfo, ConfigManager<T> configManager){
+    public PlayerManager(int maxPlayers, TeamsInfo<T> teamsInfo, ConfigManager<T> configManager){
         this.maxPlayers = maxPlayers;
-        this.teamInfo = teamInfo;
+        this.teamsInfo = teamsInfo;
         this.configManager = configManager;
         this.prepareTeams();
     }
 
     private void prepareTeams(){
-        if (this.teamInfo == null || this.teamInfo.getTeamCount() == 0){
+        if (this.teamsInfo == null || this.teamsInfo.getTeamCount() == 0){
             this.teamsGame = false;
             return;
         }
         this.teamsGame = true;
-        HashMap<String, CustomTeam> teams = teamInfo.getAllowedTeams();
+        HashMap<String, CustomTeam> teams = teamsInfo.getAllowedTeams();
         if (teams.isEmpty()){
             HashMap<String, CustomTeam> allTeams = configManager.getTeams();
-            if (this.teamInfo.getTeamCount() < 0){
+            if (this.teamsInfo.getTeamCount() < 0){
                 this.allowedTeams.putAll(allTeams);
                 this.uniformTeamsList.addAll(allTeams.keySet());
                 return;
             }
-            if (allTeams.size() < this.teamInfo.getTeamCount()){
-                throw new RuntimeException("Registered teams do not cover the requirements for a game (" + allTeams.size() + "<" + this.teamInfo.getTeamCount() + ").");
+            if (allTeams.size() < this.teamsInfo.getTeamCount()){
+                throw new RuntimeException("Registered teams do not cover the requirements for a game (" + allTeams.size() + "<" + this.teamsInfo.getTeamCount() + ").");
             }
             List<String> teamsKeys = new ArrayList<>(allTeams.keySet());
-            while (this.allowedTeams.size() != this.teamInfo.getTeamCount()){
+            while (this.allowedTeams.size() != this.teamsInfo.getTeamCount()){
                 String team = teamsKeys.get(RANDOM.nextInt(teamsKeys.size()));
                 if (!this.allowedTeams.containsKey(team)){
                     this.allowedTeams.put(team, allTeams.get(team));
@@ -93,7 +93,7 @@ public class PlayerManager<T extends Plugin> {
 
     private void joinPlayerToTeam(Player player){
         if (this.teams.containsKey(player)) return;
-        switch (this.teamInfo.getTeamDistribution()){
+        switch (this.teamsInfo.getTeamDistribution()){
             case UNIFORM -> {
                 String team = this.uniformTeamsList.get(this.uniformIndex);
                 this.teams.put(player, team);

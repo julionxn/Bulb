@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/Bulb.main.iml" filepath="$PROJECT_DIR$/.idea/modules/Bulb.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/net.pulga22.Bulb.main.iml" filepath="$PROJECT_DIR$/.idea/modules/net.pulga22.Bulb.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/net.pulga22.MinigameCore.main.iml" filepath="$PROJECT_DIR$/.idea/modules/net.pulga22.MinigameCore.main.iml" />
     </modules>
   </component>
