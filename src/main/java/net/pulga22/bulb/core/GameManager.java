@@ -130,11 +130,11 @@ public class GameManager<T extends GameInstance<K>, K extends Plugin> {
             this.availableGame = null;
         }
         this.games.remove(game.getID());
-        game.playerManager.getPlayersPlaying().forEach(player -> {
+        game.getPlayerManager().getPlayersPlaying().forEach(player -> {
             String uuid = PluginUtils.uuidOf(player);
             this.playing.remove(uuid);
         });
-        game.playerManager.getPlayersSpectating().forEach(player -> {
+        game.getPlayerManager().getPlayersSpectating().forEach(player -> {
             String uuid = PluginUtils.uuidOf(player);
             this.spectating.remove(uuid);
         });
