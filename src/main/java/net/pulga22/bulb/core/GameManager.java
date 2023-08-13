@@ -95,7 +95,7 @@ public class GameManager<T extends GameInstance<K>, K extends Plugin> {
      */
     protected T newGame(){
         WorldOption option = getRandomWorldOption();
-        return runnable.create(this.plugin, this.configManager, this, this.gameName, option, true);
+        return runnable.create(this.plugin, this, this.gameName, option, true);
     }
 
     private WorldOption getRandomWorldOption(){
