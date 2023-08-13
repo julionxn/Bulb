@@ -105,8 +105,8 @@ public class GameInstance<T extends Plugin> {
     protected final T plugin;
     protected final Logger logger;
     private final GameManager<? extends GameInstance<T>, T> gameManager;
-    private GameState gameState = GameState.NONE;
-    private boolean prepared = false;
+    private volatile GameState gameState = GameState.NONE;
+    private volatile boolean prepared = false;
     private final PlayerManager<T> playerManager;
     private final GameScoreboard scoreboard;
     private final int ID;
@@ -215,9 +215,9 @@ public class GameInstance<T extends Plugin> {
         countdownGameStart.runTaskTimer(this.plugin, 0, 20);
         this.timersRunnable.add(countdownGameStart);
         this.prepared = true;
+        this.changeGameState(GameState.PREPARED);
         this.queueToJoin.forEach(this::joinPlayer);
         this.queueToJoin.clear();
-        this.changeGameState(GameState.PREPARED);
         onPreparation();
     }
 
@@ -441,7 +441,7 @@ public class GameInstance<T extends Plugin> {
         return this.gameState;
     }
 
-    private void changeGameState(GameState gameState){
+    private synchronized void changeGameState(GameState gameState){
         if (this.gameState == gameState) return;
         this.onGameStateChange(this.gameState, gameState);
         this.gameState = gameState;

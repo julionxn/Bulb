@@ -21,6 +21,7 @@ public final class Bulb extends JavaPlugin {
         logger.info("    |___/ \\_,_||_||_.__/ ");
         logger.info("                      ");
         logger.info("===========================" + PluginUtils.ANSI_RESET);
+
     }
 
 }
