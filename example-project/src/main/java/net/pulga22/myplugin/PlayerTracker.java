@@ -15,7 +15,6 @@ public class PlayerTracker extends BukkitRunnable {
     @Override
     public void run() {
         this.gameInstance.getPlayerManager().getPlayersPlaying().forEach(player -> {
-            System.out.println(player);
             Location location = player.getLocation();
             if (location.getY() <= -64){
                 this.gameInstance.markPlayerAsDead(player);
