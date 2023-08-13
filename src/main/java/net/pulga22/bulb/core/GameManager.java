@@ -137,6 +137,7 @@ public class GameManager<T extends GameInstance<K>, K extends Plugin> {
         game.getPlayerManager().getPlayersSpectating().forEach(player -> {
             String uuid = PluginUtils.uuidOf(player);
             this.spectating.remove(uuid);
+            this.playing.remove(uuid);
         });
         this.plugin.getLogger().info(">Ended game with id " + game.getID() + ".");
     }
