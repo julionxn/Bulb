@@ -1,8 +1,0 @@
-name: MyPlugin
-version: '${version}'
-main: net.pulga22.myplugin.MyPlugin
-api-version: '1.20'
-softdepend:
-  - bulb
-depend:
-  - bulb
