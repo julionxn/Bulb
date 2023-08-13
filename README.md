@@ -9,4 +9,5 @@ A core created to speed up the work when creating new mini-games for plugins. Pa
 
 ## How to use it
 Check the wiki to learn how to use it in your plugins -> [Click here](https://julion-n.gitbook.io/bulb/)
+
 For an example proyect -> [Click here](https://github.com/Julioxidop/Bulb/tree/master/example-project)
