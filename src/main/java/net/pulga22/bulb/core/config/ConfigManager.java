@@ -1,6 +1,5 @@
 package net.pulga22.bulb.core.config;
 
-import net.pulga22.bulb.core.teams.CustomTeam;
 import net.pulga22.bulb.core.worlds.WorldOption;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -36,9 +35,7 @@ public class ConfigManager<T extends Plugin> {
     protected File templatesFolder;
     protected File gamesFolder;
     private FileConfiguration worldsConfig;
-    private FileConfiguration teamsConfig;
     private final HashMap<String, HashSet<WorldOption>> loadedWorlds = new HashMap<>();
-    private final HashMap<String, CustomTeam> loadedTeams = new HashMap<>();
 
     protected ConfigManager(T plugin){
         this.plugin = plugin;
@@ -81,18 +78,6 @@ public class ConfigManager<T extends Plugin> {
                     this.worldsConfig = config;
                     this.logger.info("Worlds config file loaded...");
                     this.parseWorlds();
-                });
-        this.tryLoad("teams.yml",
-                (file, config) -> {
-                    config.addDefault("teams", emptyArray);
-                    config.options().copyDefaults(true);
-                    this.save(config, file);
-                    this.logger.info("Teams config file created.");
-                },
-                (file, config) -> {
-                    this.teamsConfig = config;
-                    this.logger.info("Teams config file loaded...");
-                    this.parseTeams();
                 });
     }
 
@@ -180,24 +165,6 @@ public class ConfigManager<T extends Plugin> {
         });
     }
 
-    private void parseTeams(){
-        final ConfigurationSection mainSection = this.teamsConfig.getConfigurationSection("teams");
-        if (mainSection == null){
-            throw new MalformedConfigFile("teams.yml");
-        }
-        final Set<String> loadedTeams = mainSection.getKeys(false);
-        loadedTeams.forEach(teamKey -> {
-            ConfigurationSection teamSection = mainSection.getConfigurationSection(teamKey);
-            if (teamSection == null) return;
-            String teamName = teamSection.getString("name");
-            String color = teamSection.getString("color");
-            String mcColor = teamSection.getString("mc_color");
-            CustomTeam team = new CustomTeam(teamName, color, mcColor);
-            this.loadedTeams.put(teamKey, team);
-            this.logger.info(">     Team " + teamName + " loaded.");
-        });
-    }
-
     /**
      * @param game The gameName.
      * @return The worldOptions of that game.
@@ -207,29 +174,6 @@ public class ConfigManager<T extends Plugin> {
         return this.loadedWorlds.get(game);
     }
 
-    /**
-     * @return Gets the loaded teams from the config,
-     */
-    public final HashMap<String, CustomTeam> getTeams(){
-        return this.loadedTeams;
-    }
-
-    /**
-     * @return A random team key.
-     */
-    public final String getRandomTeam(){
-        String[] teams = this.loadedTeams.keySet().toArray(new String[0]);
-        return teams[RANDOM.nextInt(teams.length)];
-    }
-
-    /**
-     * @param name The team key.
-     * @return The custom team according to the key.
-     */
-    @Nullable
-    public final CustomTeam getTeamOf(String name){
-        return this.loadedTeams.get(name);
-    }
 
     protected static class MalformedConfigFile extends RuntimeException{
         public MalformedConfigFile(String file) {

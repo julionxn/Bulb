@@ -1,8 +1,6 @@
 package net.pulga22.bulb.core.score.components.counter;
 
 import net.pulga22.bulb.core.score.components.SimpleComponent;
-import net.pulga22.bulb.core.teams.CustomTeam;
-import org.bukkit.ChatColor;
 import org.bukkit.scoreboard.Score;
 
 public class CounterComponent extends SimpleComponent {
@@ -21,7 +19,7 @@ public class CounterComponent extends SimpleComponent {
 
     @Override
     public Score getScore() {
-        return this.objective.getScore(prefix + ChatColor.WHITE + this.points);
+        return this.objective.getScore(prefix + this.points);
     }
 
     public void increment(){
@@ -51,14 +49,6 @@ public class CounterComponent extends SimpleComponent {
 
     public int get(){
         return this.points;
-    }
-
-    public static CounterComponent of(CustomTeam customTeam){
-        return new CounterComponent(customTeam.getChatColor() + customTeam.getName());
-    }
-
-    public static CounterComponent of(CustomTeam customTeam, int starting){
-        return new CounterComponent(customTeam.getChatColor() + customTeam.getName(), starting);
     }
 
 }

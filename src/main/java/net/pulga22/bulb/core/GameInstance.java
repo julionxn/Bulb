@@ -1,15 +1,12 @@
 package net.pulga22.bulb.core;
 
-import net.pulga22.bulb.core.config.ConfigManager;
 import net.pulga22.bulb.core.players.PlayerManager;
 import net.pulga22.bulb.core.runnables.CountdownGameEndRunnable;
 import net.pulga22.bulb.core.runnables.CountdownGameStartRunnable;
 import net.pulga22.bulb.core.runnables.TimerRunnable;
 import net.pulga22.bulb.core.score.GameScoreboard;
-import net.pulga22.bulb.core.score.GameScoreboardInfo;
 import net.pulga22.bulb.core.states.GameState;
 import net.pulga22.bulb.core.states.PlayerState;
-import net.pulga22.bulb.core.teams.TeamsInfo;
 import net.pulga22.bulb.core.worlds.WorldInstance;
 import net.pulga22.bulb.core.worlds.WorldOption;
 import org.bukkit.Bukkit;
@@ -46,10 +43,7 @@ import java.util.logging.Logger;
  * <br></div>
  * <div><p>Other methods do not need to be overwritten, however, it is possible to do so to determine other aspects about the game instance.</p>
  * <li>
- *     <b>{@link #getTeamsInfo(TeamsInfo)}</b> It is used to determine certain parameters when establishing the teams of the players entering the game instance.
- * </li>
- * <li>
- *     <b>{@link #initScoreboard(GameScoreboard)}</b> It is used to create and initialize components inside the scoreboard of the game instance.
+ *     <b>{@link #initScoreboard()}</b> It is used to create and initialize components inside the scoreboard of the game instance.
  * </li><br>
  * </div>
  * <p>It has several methods that are <b>recommended</b> to be overridden to perform actions on certain events of the game instance:</p>
@@ -108,29 +102,23 @@ public class GameInstance<T extends Plugin> {
     private volatile GameState gameState = GameState.NONE;
     private volatile boolean prepared = false;
     private final PlayerManager<T> playerManager;
-    private final GameScoreboard scoreboard;
+    private final GameScoreboard gameScoreboard;
     private final int ID;
     public final String gameName;
     private final WorldInstance worldInstance;
     private final HashSet<BukkitRunnable> timersRunnable = new HashSet<>();
     private final List<Player> queueToJoin = new ArrayList<>();
 
-    public <K extends GameInstance<T>> GameInstance(T plugin, ConfigManager<T> configManager, GameManager<K, T> manager, String gameName, WorldOption worldOption, GameScoreboardInfo info, boolean prepareOnCreation) {
+    public <K extends GameInstance<T>> GameInstance(T plugin, GameManager<K, T> manager, String gameName, WorldOption worldOption, boolean prepareOnCreation) {
         this.onNew();
         this.plugin = plugin;
         this.logger = plugin.getLogger();
         this.gameManager = manager;
         this.gameName = gameName;
         this.ID = manager.random.nextInt(Integer.MAX_VALUE);
-        TeamsInfo<T> teamsInfo = this.getTeamsInfo(new TeamsInfo<>(configManager));
-        this.playerManager = new PlayerManager<>(getMaxPlayers(), teamsInfo, configManager);
-        if (!info.empty()){
-            this.scoreboard = new GameScoreboard(info, this.gameName);
-            this.initScoreboard(this.scoreboard);
-        } else {
-            this.scoreboard = null;
-        }
+        this.playerManager = new PlayerManager<>(getMaxPlayers());
         this.worldInstance = new WorldInstance(plugin, this.ID, worldOption);
+        this.gameScoreboard = this.initScoreboard();
         this.logger.info(">New game instance of " + this.gameName + " with id " + this.ID + " created.");
         if (prepareOnCreation) this.prepare();
     }
@@ -177,21 +165,12 @@ public class GameInstance<T extends Plugin> {
     }
 
     /**
-     * Used to set the teams info about the game. Return null to not use teams in this game.
-     * <p><b>Intended to override.</b></p>
-     * @param teamsInfo The teams' info.
-     */
-    public TeamsInfo<T> getTeamsInfo(TeamsInfo<T> teamsInfo){
-        return null;
-    }
-
-    /**
      * Used to initialize the components of the Greeko Scoreboard.
      * <p><b>Intended to override.</b></p>
-     * @param gameScoreboard The Greeko Scoreboard of the game instance.
+     * @return The GameScoreboard of the game.
      */
-    public void initScoreboard(GameScoreboard gameScoreboard){
-
+    public GameScoreboard initScoreboard(){
+        return null;
     }
 
     /**
@@ -244,8 +223,8 @@ public class GameInstance<T extends Plugin> {
             this.logger.log(Level.SEVERE, "Game must be prepared first after trying to join players.");
             return null;
         }
-        if (this.scoreboard != null){
-            this.scoreboard.showToPlayer(player);
+        if (this.gameScoreboard != null){
+            this.gameScoreboard.showToPlayer(player);
         }
         if (this.gameState == GameState.PLAYING){
             this.playerManager.joinPlayerAsSpectator(player);
@@ -263,16 +242,6 @@ public class GameInstance<T extends Plugin> {
         return playerState;
     }
 
-    /**
-     * Joins a player with a specific team.
-     * @param player The player.
-     * @param team The team key.
-     * @return The PlayerState.
-     */
-    public final PlayerState joinPlayerToTeam(Player player, String team){
-        this.playerManager.joinPlayerToTeam(player, team);
-        return this.joinPlayer(player);
-    }
 
     /**
      * Always triggers on the player who joined the game.
@@ -398,8 +367,8 @@ public class GameInstance<T extends Plugin> {
         });
         this.worldInstance.finish();
         this.gameManager.finishGame(this);
-        if (this.scoreboard != null){
-            this.scoreboard.delete();
+        if (this.gameScoreboard != null){
+            this.gameScoreboard.delete();
         }
         this.timersRunnable.forEach(BukkitRunnable::cancel);
         changeGameState(GameState.FINISHED);

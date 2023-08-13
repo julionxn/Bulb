@@ -9,5 +9,5 @@ import org.bukkit.plugin.Plugin;
 
 @FunctionalInterface
 public interface ICreateGameInstance<T extends GameInstance<K>, K extends Plugin> {
-    T create(K plugin, ConfigManager<K> configManager, GameManager<T, K> gameManager, String gameName, WorldOption worldOption, GameScoreboardInfo info, boolean prepareOnCreation);
+    T create(K plugin, ConfigManager<K> configManager, GameManager<T, K> gameManager, String gameName, WorldOption worldOption, boolean prepareOnCreation);
 }

@@ -34,27 +34,21 @@ public class GameManager<T extends GameInstance<K>, K extends Plugin> {
     protected final ICreateGameInstance<T, K> runnable;
     protected final HashSet<WorldOption> worldOptions;
     protected final ConfigManager<K> configManager;
-    protected final GameScoreboardInfo gameScoreboardInfo;
 
-    protected GameManager(K plugin, ConfigManager<K> configManager, String gameName, ICreateGameInstance<T, K> gameInstance, GameScoreboardInfo gameScoreboardInfo) {
+    protected GameManager(K plugin, ConfigManager<K> configManager, String gameName, ICreateGameInstance<T, K> gameInstance) {
         this.plugin = plugin;
         this.gameName = gameName;
         this.runnable = gameInstance;
         this.configManager = configManager;
         this.worldOptions = configManager.getWorldsOfGame(gameName);
-        this.gameScoreboardInfo = gameScoreboardInfo;
-    }
-
-    public static <G extends GameInstance<P>, P extends Plugin> GameManager<G, P> register(@NotNull P plugin, @NotNull ConfigManager<P> configManager, @NotNull String gameName, @NotNull ICreateGameInstance<G, P> gameInstance, @NotNull GameScoreboardInfo info){
-        HashSet<WorldOption> worlds = configManager.getWorldsOfGame(gameName);
-        if (worlds == null || worlds.isEmpty()){
-            throw new RuntimeException("No worlds of " + gameName + " founded.");
-        }
-        return new GameManager<>(plugin, configManager, gameName, gameInstance, info);
     }
 
     public static <G extends GameInstance<P>, P extends Plugin> GameManager<G, P> register(@NotNull P plugin, @NotNull ConfigManager<P> configManager, @NotNull String gameName, @NotNull ICreateGameInstance<G, P> gameInstance){
-        return register(plugin, configManager, gameName, gameInstance, GameScoreboardInfo.ofEmpty());
+        HashSet<WorldOption> worlds = configManager.getWorldsOfGame(gameName);
+        if (worlds == null || worlds.isEmpty()){
+            plugin.getLogger().severe("No worlds of " + gameName + " founded.");
+        }
+        return new GameManager<>(plugin, configManager, gameName, gameInstance);
     }
 
     /**
@@ -75,18 +69,6 @@ public class GameManager<T extends GameInstance<K>, K extends Plugin> {
         if (this.isInsideGame(player)) return;
         this.shouldInitNewGame();
         PlayerState playerState = this.availableGame.joinPlayer(player);
-        this.registerPlayer(player, playerState);
-    }
-
-    /**
-     * Joins a player to a game to a specific team.
-     * @param player Player who wants to join.
-     * @param team The team key.
-     */
-    public void joinPlayerToTeam(Player player, String team){
-        if (this.isInsideGame(player)) return;
-        this.shouldInitNewGame();
-        PlayerState playerState = this.availableGame.joinPlayerToTeam(player, team);
         this.registerPlayer(player, playerState);
     }
 
@@ -113,7 +95,7 @@ public class GameManager<T extends GameInstance<K>, K extends Plugin> {
      */
     protected T newGame(){
         WorldOption option = getRandomWorldOption();
-        return runnable.create(this.plugin, this.configManager, this, this.gameName, option, this.gameScoreboardInfo, true);
+        return runnable.create(this.plugin, this.configManager, this, this.gameName, option, true);
     }
 
     private WorldOption getRandomWorldOption(){

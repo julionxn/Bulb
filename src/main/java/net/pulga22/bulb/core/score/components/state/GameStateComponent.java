@@ -7,22 +7,22 @@ import org.bukkit.scoreboard.Score;
 
 import java.security.Provider;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class GameStateComponent extends SimpleComponent {
 
     private GameState state = GameState.NONE;
     private final String prefix;
-    private final StateFactory factory;
+    private final Function<GameState, String> function;
 
-    public GameStateComponent(String prefix,  StateFactory factory) {
-        super();
+    public GameStateComponent(String prefix,  Function<GameState, String> function) {
         this.prefix = prefix;
-        this.factory = factory;
+        this.function = function;
     }
 
     @Override
     public Score getScore() {
-        return this.objective.getScore(this.prefix + this.factory.getStringPerState(this.state));
+        return this.objective.getScore(this.prefix + this.function.apply(this.state));
     }
 
     public void setState(GameState state){

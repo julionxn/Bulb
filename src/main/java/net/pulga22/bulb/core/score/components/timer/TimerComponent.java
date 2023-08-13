@@ -26,7 +26,7 @@ public class TimerComponent extends SimpleComponent {
 
     @Override
     public Score getScore() {
-        return this.objective.getScore(this.prefix + ChatColor.WHITE + this.timeLeft);
+        return this.objective.getScore(this.prefix + this.timeLeft);
     }
 
     public void start(){

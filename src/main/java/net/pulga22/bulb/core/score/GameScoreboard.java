@@ -5,7 +5,6 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.pulga22.bulb.core.score.components.EmptyComponent;
-import net.pulga22.bulb.core.teams.CustomTeam;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.*;
@@ -21,19 +20,18 @@ public class GameScoreboard {
     private final List<GameScoreComponent> components = new ArrayList<>();
     private boolean hided = false;
     private Score defaultScore;
-    private final String ganeName;
-    private final TextComponent prefix;
+    private final TextComponent title;
     private final String lastRowInfo;
 
-    public GameScoreboard(GameScoreboardInfo info, String gameName) {
-        this.prefix = info.prefix();
+    private GameScoreboard(GameScoreboardInfo info) {
+        this.title = info.title();
         this.lastRowInfo = info.lastRow();
         this.scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
-        TextComponent title = this.prefix.append(Component.text(gameName.toUpperCase(), TextColor.color(info.gameColor())));
-        this.objective = this.scoreboard.registerNewObjective("gameScore" + new Random().nextInt(0,999), Criteria.DUMMY, title);
+        this.objective = this.scoreboard.registerNewObjective("gameScore" + new Random().nextInt(0,999), Criteria.DUMMY, this.title);
         this.objective.setDisplaySlot(DisplaySlot.SIDEBAR);
-        this.addDefaultScore(0);
-        this.ganeName = gameName;
+        if (info.lastRow() != null){
+            this.addDefaultScore(0);
+        }
     }
 
     private void addDefaultScore(int spaces){
@@ -53,8 +51,8 @@ public class GameScoreboard {
     }
 
     public void callUpdate(){
-        if (this.hided) return;
-        final int[] max = {(this.prefix.content() + this.ganeName).length()};
+        if (this.hided || this.lastRowInfo == null) return;
+        final int[] max = {(this.title.content()).length()};
         components.stream().filter(GameScoreComponent::isVisible).forEach(gameScoreComponent -> {
             int size = gameScoreComponent.getScore().getEntry().length();
             if (size > max[0]){
@@ -81,10 +79,6 @@ public class GameScoreboard {
         return team;
     }
 
-    public Team registerTeam(CustomTeam customTeam){
-        return registerTeam(customTeam.getName(), "[" + customTeam.getName() + "] ", customTeam.getColor(), customTeam.getGlowing());
-    }
-
     public void showToPlayer(Player player){
         player.setScoreboard(this.scoreboard);
     }
@@ -96,5 +90,28 @@ public class GameScoreboard {
         this.objective.unregister();
     }
 
+    public static Builder builder(){
+        return new Builder();
+    }
+
+    public static class Builder{
+        private TextComponent title = Component.text("GameScoreboard");
+        private String lastRow = null;
+
+        public Builder setTitle(TextComponent title){
+            this.title = title;
+            return this;
+        }
+
+        public Builder setLastRow(String lastRow){
+            this.lastRow = lastRow;
+            return this;
+        }
+
+        public GameScoreboard build(){
+            return new GameScoreboard(new GameScoreboardInfo(this.title, this.lastRow));
+        }
+
+    }
 
 }
