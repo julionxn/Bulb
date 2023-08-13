@@ -19,6 +19,6 @@ public class CounterLimitComponent extends CounterComponent{
 
     @Override
     public Score getScore() {
-        return this.objective.getScore(prefix + ": " + ChatColor.WHITE + this.points + " / " + this.limit);
+        return this.objective.getScore(prefix + ChatColor.WHITE + this.points + "/" + this.limit);
     }
 }

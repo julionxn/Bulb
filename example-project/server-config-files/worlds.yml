@@ -1,0 +1,9 @@
+worlds:
+ tntrun:
+  template:
+   name: "tntRunTemplate"
+   pois:
+    spawnpoint:
+     - 8.5
+     - -54
+     - 8.5

@@ -21,7 +21,7 @@ public class CounterComponent extends SimpleComponent {
 
     @Override
     public Score getScore() {
-        return this.objective.getScore(prefix + ": " + ChatColor.WHITE + this.points);
+        return this.objective.getScore(prefix + ChatColor.WHITE + this.points);
     }
 
     public void increment(){
