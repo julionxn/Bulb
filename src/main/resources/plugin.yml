@@ -1,4 +1,4 @@
-name: Bulb
+name: bulb
 version: '${version}'
 main: net.pulga22.bulb.Bulb
 api-version: '1.20'

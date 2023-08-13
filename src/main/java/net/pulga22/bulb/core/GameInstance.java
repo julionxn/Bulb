@@ -211,13 +211,13 @@ public class GameInstance<T extends Plugin> {
 
     private synchronized void prepareWhenWorldInstanceReady(){
         if (this.gameState == GameState.PREPARED) return;
-        this.changeGameState(GameState.PREPARED);
         CountdownGameStartRunnable<T> countdownGameStart = new CountdownGameStartRunnable<>(this);
         countdownGameStart.runTaskTimer(this.plugin, 0, 20);
         this.timersRunnable.add(countdownGameStart);
         this.prepared = true;
         this.queueToJoin.forEach(this::joinPlayer);
         this.queueToJoin.clear();
+        this.changeGameState(GameState.PREPARED);
         onPreparation();
     }
 
@@ -313,10 +313,10 @@ public class GameInstance<T extends Plugin> {
      * @see GameInstance#onGameStarted(List, List)
      */
     public final void startGame(){
-        this.changeGameState(GameState.PLAYING);
         TimerRunnable<T> countdownGameStart = new TimerRunnable<>(this);
         countdownGameStart.runTaskTimer(this.plugin, 0, 20);
         this.timersRunnable.add(countdownGameStart);
+        this.changeGameState(GameState.PLAYING);
         onGameStarted(this.playerManager.getPlayersPlaying(), this.playerManager.getPlayersSpectating());
     }
 
@@ -366,10 +366,10 @@ public class GameInstance<T extends Plugin> {
      * @see GameInstance#onPrepareToEnd(List, List)
      */
     public final void prepareToEnd(){
-        changeGameState(GameState.FINISHING);
         CountdownGameEndRunnable<T> countdownGameEnd = new CountdownGameEndRunnable<>(this);
         countdownGameEnd.runTaskTimer(this.plugin, 0, 20);
         this.timersRunnable.add(countdownGameEnd);
+        changeGameState(GameState.FINISHING);
         onPrepareToEnd(this.playerManager.getPlayersPlaying(), this.playerManager.getPlayersSpectating());
     }
 
@@ -390,7 +390,6 @@ public class GameInstance<T extends Plugin> {
      * @see GameInstance#onEnding(List, List)
      */
     public final void endGame(){
-        changeGameState(GameState.FINISHED);
         World mainWorld = Bukkit.getServer().getWorlds().get(0);
         this.playerManager.getPlayersPlaying().forEach(player -> player.teleport(mainWorld.getSpawnLocation()));
         this.playerManager.getPlayersSpectating().forEach(player -> {
@@ -403,6 +402,7 @@ public class GameInstance<T extends Plugin> {
             this.scoreboard.delete();
         }
         this.timersRunnable.forEach(BukkitRunnable::cancel);
+        changeGameState(GameState.FINISHED);
         onEnding(this.playerManager.getPlayersPlaying(), this.playerManager.getPlayersSpectating());
     }
 

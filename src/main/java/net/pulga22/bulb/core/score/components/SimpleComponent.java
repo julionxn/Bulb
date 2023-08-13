@@ -1,5 +1,6 @@
 package net.pulga22.bulb.core.score.components;
 
+import net.pulga22.bulb.core.MustOverride;
 import net.pulga22.bulb.core.score.GameScoreComponent;
 import net.pulga22.bulb.core.score.GameScoreboard;
 import net.pulga22.bulb.core.score.errors.NoGetScoreOverrideRuntimeError;
@@ -32,10 +33,9 @@ public class SimpleComponent implements GameScoreComponent {
     }
 
     /**
-     * <p><b>NOT DEPRECATED:</b> This is method is not deprecated, deprecation means is NECESSARY to override.</p>
      * @return The score that is going to be displayed when started or updated.
      */
-    @Deprecated
+    @MustOverride("Subclasses must override this method.")
     public Score getScore(){
         return null;
     }
