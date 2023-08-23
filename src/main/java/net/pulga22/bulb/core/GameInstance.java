@@ -1,8 +1,6 @@
 package net.pulga22.bulb.core;
 
 import net.pulga22.bulb.core.players.PlayerManager;
-import net.pulga22.bulb.core.runnables.CountdownGameEndRunnable;
-import net.pulga22.bulb.core.runnables.CountdownGameStartRunnable;
 import net.pulga22.bulb.core.runnables.TimerRunnable;
 import net.pulga22.bulb.core.score.GameScoreboard;
 import net.pulga22.bulb.core.states.GameState;
@@ -32,13 +30,13 @@ import java.util.logging.Logger;
  *     <b>{@link #getMaxPlayers()}</b> the return value determines the maximum amount of players inside the game.
  * </li>
  * <li>
- *     <b>{@link #getTimeBeforeStart()}</b> when the game is prepared, determines the amount of seconds before the game starts.
+ *     <b>{@link #getSecondsBeforeStart()}</b> when the game is prepared, determines the amount of seconds before the game starts.
  * </li>
  * <li>
- *     <b>{@link #getTimeOfGame()}</b> when the game has started, determines the amount of seconds before the game prepares to end.
+ *     <b>{@link #getSecondsOfPlayableTime()}</b> when the game has started, determines the amount of seconds before the game prepares to end.
  * </li>
  * <li>
- *     <b>{@link #getTimeBeforeEnd()}</b> when the game is prepared to end, determines the amount of seconds before the game ends.
+ *     <b>{@link #getSecondsBeforeEnd()}</b> when the game is prepared to end, determines the amount of seconds before the game ends.
  * </li>
  * <br></div>
  * <div><p>Other methods do not need to be overwritten, however, it is possible to do so to determine other aspects about the game instance.</p>
@@ -55,7 +53,7 @@ import java.util.logging.Logger;
  *     A game instance can be created but no prepared.<br>
  *     Players are only allowed to enter the game instance when it is prepared.<br>
  *     When the instance is prepared, it automatically starts a counter parameterized
- *     by {@link #getTimeBeforeStart()} which, at the end, starts the game.<br>
+ *     by {@link #getSecondsBeforeStart()} which, at the end, starts the game.<br>
  *     By default the {@link GameManager} automatically prepares the game instance.
  * </li>
  * <li>
@@ -74,7 +72,7 @@ import java.util.logging.Logger;
  * <li>
  *     <b>{@link #onGameStarted(List, List)}</b> triggers when the game instance is started.<br>
  *     When the instance is started, it automatically starts a counter parameterized
- *     by {@link #getTimeOfGame()} which, at the end, prepares to end the game.<br>
+ *     by {@link #getSecondsOfPlayableTime()} which, at the end, prepares to end the game.<br>
  * </li>
  * <li>
  *     <b>{@link #onDeath(World, Player)}</b> triggers when a player is marked as death.<br>
@@ -83,7 +81,7 @@ import java.util.logging.Logger;
  * <li>
  *     <b>{@link #onPrepareToEnd(List, List)}</b> triggers when the game instance is prepared to end.<br>
  *     When the instance is prepared to end, it automatically starts a counter parameterized
- *     by {@link #getTimeBeforeEnd()} which, at the end, completely ends the game.<br>
+ *     by {@link #getSecondsBeforeEnd()} which, at the end, completely ends the game.<br>
  * </li>
  * <li>
  *     <b>{@link #onEnding(List, List)}</b> triggers when the game instance is completely ended.<br>
@@ -142,7 +140,7 @@ public class GameInstance<T extends Plugin> {
      * @return The time before the match starts after being prepared.
      */
     @MustOverride("Subclasses must override this method.")
-    public int getTimeBeforeStart(){
+    public int getSecondsBeforeStart(){
         return 30;
     }
 
@@ -151,7 +149,7 @@ public class GameInstance<T extends Plugin> {
      * @return The time the match lasts.
      */
     @MustOverride("Subclasses must override this method.")
-    public int getTimeOfGame(){
+    public int getSecondsOfPlayableTime(){
         return 60;
     }
 
@@ -160,7 +158,7 @@ public class GameInstance<T extends Plugin> {
      * @return The time before the match ends after finishing.
      */
     @MustOverride("Subclasses must override this method.")
-    public int getTimeBeforeEnd(){
+    public int getSecondsBeforeEnd(){
         return 30;
     }
 
@@ -190,9 +188,8 @@ public class GameInstance<T extends Plugin> {
 
     private synchronized void prepareWhenWorldInstanceReady(){
         if (this.gameState == GameState.PREPARED) return;
-        CountdownGameStartRunnable<T> countdownGameStart = new CountdownGameStartRunnable<>(this);
-        countdownGameStart.runTaskTimer(this.plugin, 0, 20);
-        this.timersRunnable.add(countdownGameStart);
+        TimerRunnable timerBeforeStart = new TimerRunnable(getSecondsBeforeStart(), this::startGame);
+        this.timersRunnable.add(timerBeforeStart.start(this.plugin));
         this.prepared = true;
         this.changeGameState(GameState.PREPARED);
         this.queueToJoin.forEach(this::joinPlayer);
@@ -226,7 +223,7 @@ public class GameInstance<T extends Plugin> {
         if (this.gameScoreboard != null){
             this.gameScoreboard.showToPlayer(player);
         }
-        if (this.gameState == GameState.PLAYING){
+        if (this.gameState.hierarchy > 2){
             this.playerManager.joinPlayerAsSpectator(player);
             onJoinedCommon(player);
             onJoinedAsSpectator(player);
@@ -244,31 +241,31 @@ public class GameInstance<T extends Plugin> {
 
 
     /**
-     * Always triggers on the player who joined the game.
+     * Always triggers on the player when joins the game.
      * <p><b>Intended to override.</b></p>
-     * @see WorldInstance#joinPlayer(Player, double, double, double)
-     * @see WorldInstance#joinPlayer(Player, double, double, double, float, float)
+     * @see WorldInstance#teleportPlayer(Player, double, double, double)
+     * @see WorldInstance#teleportPlayer(Player, double, double, double, float, float)
      * @param player The player who joined.
      */
     protected void onJoinedCommon(Player player){
-        this.worldInstance.joinPlayer(player);
+        this.worldInstance.teleportPlayer(player);
     }
 
     /**
-     * Triggers on the player if joins as a player.
+     * Triggers on the player if it joins as a player.
      * <p><b>Intended to override.</b></p>
-     * @see WorldInstance#joinPlayer(Player, double, double, double)
-     * @see WorldInstance#joinPlayer(Player, double, double, double, float, float)
+     * @see WorldInstance#teleportPlayer(Player, double, double, double)
+     * @see WorldInstance#teleportPlayer(Player, double, double, double, float, float)
      * @param player The player who joined.
      */
     protected void onJoinedAsPlayer(Player player){
     }
 
     /**
-     * Triggers on the player if joins as a spectator.
+     * Triggers on the player if it joins as a spectator.
      * <p><b>Intended to override.</b></p>
-     * @see WorldInstance#joinPlayer(Player, double, double, double)
-     * @see WorldInstance#joinPlayer(Player, double, double, double, float, float)
+     * @see WorldInstance#teleportPlayer(Player, double, double, double)
+     * @see WorldInstance#teleportPlayer(Player, double, double, double, float, float)
      * @param player The player who joined.
      */
     protected void onJoinedAsSpectator(Player player){
@@ -282,9 +279,8 @@ public class GameInstance<T extends Plugin> {
      * @see GameInstance#onGameStarted(List, List)
      */
     public final void startGame(){
-        TimerRunnable<T> countdownGameStart = new TimerRunnable<>(this);
-        countdownGameStart.runTaskTimer(this.plugin, 0, 20);
-        this.timersRunnable.add(countdownGameStart);
+        TimerRunnable timerOfPlayableTime = new TimerRunnable(this.getSecondsOfPlayableTime(), this::prepareToEnd);
+        this.timersRunnable.add(timerOfPlayableTime.start(this.plugin));
         this.changeGameState(GameState.PLAYING);
         onGameStarted(this.playerManager.getPlayersPlaying(), this.playerManager.getPlayersSpectating());
     }
@@ -322,7 +318,7 @@ public class GameInstance<T extends Plugin> {
     /**
      * @return The amount of alive players.
      */
-    public int getAlivePlayers(){
+    public int amountOfAlivePlayers(){
         return this.playerManager.getPlayersPlaying().size();
     }
 
@@ -335,9 +331,8 @@ public class GameInstance<T extends Plugin> {
      * @see GameInstance#onPrepareToEnd(List, List)
      */
     public final void prepareToEnd(){
-        CountdownGameEndRunnable<T> countdownGameEnd = new CountdownGameEndRunnable<>(this);
-        countdownGameEnd.runTaskTimer(this.plugin, 0, 20);
-        this.timersRunnable.add(countdownGameEnd);
+        TimerRunnable timerBeforeEnd = new TimerRunnable(getSecondsBeforeEnd(), this::endGame);
+        this.timersRunnable.add(timerBeforeEnd.start(this.plugin));
         changeGameState(GameState.FINISHING);
         onPrepareToEnd(this.playerManager.getPlayersPlaying(), this.playerManager.getPlayersSpectating());
     }
@@ -359,19 +354,24 @@ public class GameInstance<T extends Plugin> {
      * @see GameInstance#onEnding(List, List)
      */
     public final void endGame(){
-        World mainWorld = Bukkit.getServer().getWorlds().get(0);
-        this.playerManager.getPlayersPlaying().forEach(player -> player.teleport(mainWorld.getSpawnLocation()));
+        World mainWorld = Bukkit.getWorld("world");
+        if (mainWorld == null){
+            this.logger.severe("Main world not founded.");
+            mainWorld = Bukkit.getWorlds().get(0);
+        }
+        final World finalMainWorld = mainWorld;
+        this.playerManager.getPlayersPlaying().forEach(player -> player.teleport(finalMainWorld.getSpawnLocation()));
         this.playerManager.getPlayersSpectating().forEach(player -> {
             this.showPlayer(player);
-            player.teleport(mainWorld.getSpawnLocation());
+            player.teleport(finalMainWorld.getSpawnLocation());
         });
         this.worldInstance.finish();
         this.gameManager.finishGame(this);
+        changeGameState(GameState.FINISHED);
         if (this.gameScoreboard != null){
             this.gameScoreboard.delete();
         }
         this.timersRunnable.forEach(BukkitRunnable::cancel);
-        changeGameState(GameState.FINISHED);
         onEnding(this.playerManager.getPlayersPlaying(), this.playerManager.getPlayersSpectating());
     }
 
@@ -410,8 +410,8 @@ public class GameInstance<T extends Plugin> {
         return this.gameState;
     }
 
-    private synchronized void changeGameState(GameState gameState){
-        if (this.gameState == gameState) return;
+    protected synchronized void changeGameState(GameState gameState){
+        if (gameState.hierarchy < this.gameState.hierarchy) return;
         this.onGameStateChange(this.gameState, gameState);
         this.gameState = gameState;
     }
@@ -427,7 +427,7 @@ public class GameInstance<T extends Plugin> {
     }
 
     /**
-     * @return The WorldOption containing all the info about the chosen world of the game.
+     * @return The WorldInstance containing all the info about the chosen world of the game.
      */
     public WorldInstance getWorldInstance(){
         return this.worldInstance;

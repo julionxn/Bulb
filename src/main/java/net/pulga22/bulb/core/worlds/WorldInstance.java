@@ -28,7 +28,7 @@ public class WorldInstance {
      * Starts the game world instance.
      */
     public void start(Runnable onReady){
-        if (loaded) return;
+        if (this.loaded) return;
         this.plugin.getLogger().info(">Creating a new world instance for game with id " + this.gameId + ".");
         this.loadedWorld.load(onReady);
         this.loaded = true;
@@ -45,35 +45,35 @@ public class WorldInstance {
      * Finishes the game world instance.
      */
     public void finish(){
-        if (!loaded) return;
+        if (!this.loaded) return;
         this.loadedWorld.unload();
         this.loaded = false;
     }
 
     /**
-     * Joins player to default spawn-point location of the game world instance.
+     * Teleports the player to default spawn-point location of the game world instance.
      * @param player The player.
      */
-    public void joinPlayer(Player player){
+    public void teleportPlayer(Player player){
         if (!this.loaded) return;
-        this.joinPlayer(player, this.loadedWorld.getSpawnLocation());
+        this.teleportPlayer(player, this.loadedWorld.getSpawnLocation());
     }
 
     /**
-     * Joins player to a specific location inside the game world instance.
+     * Teleports the player to a specific location inside the game world instance.
      * @param player The player.
      * @param x X coordinate of the world.
      * @param y Y coordinate of the world.
      * @param z Z coordinate of the world.
      */
-    public void joinPlayer(Player player, double x, double y, double z){
+    public void teleportPlayer(Player player, double x, double y, double z){
         if (!this.loaded) return;
         Location location = new Location(this.loadedWorld.getWorld(), x, y, z);
-        this.joinPlayer(player, location);
+        this.teleportPlayer(player, location);
     }
 
     /**
-     * Joins the player to a specific location inside the game world instance.
+     * Teleports the player to a specific location inside the game world instance.
      * @param player The player.
      * @param x X coordinate of the world.
      * @param y Y coordinate of the world.
@@ -81,13 +81,13 @@ public class WorldInstance {
      * @param yaw Starting yaw of the player. (Horizontal Axis)
      * @param pitch Starting pitch of the player. (Vertical Axis)
      */
-    public void joinPlayer(Player player, double x, double y, double z, float yaw, float pitch){
+    public void teleportPlayer(Player player, double x, double y, double z, float yaw, float pitch){
         if (!this.loaded) return;
         Location location = new Location(this.loadedWorld.getWorld(), x, y, z, yaw, pitch);
-        this.joinPlayer(player, location);
+        this.teleportPlayer(player, location);
     }
 
-    private void joinPlayer(Player player, Location location){
+    private void teleportPlayer(Player player, Location location){
         this.loadedWorld.teleportPlayerTo(player, location);
     }
 
@@ -103,7 +103,7 @@ public class WorldInstance {
 
     /**
      * @param poi The Point of Interest.
-     * @return The according location of that poi.
+     * @return The according location of the poi.
      */
     public Location getLocationOfPoi(PointOfInterest poi){
         return new Location(this.getWorld(), poi.x(), poi.y(), poi.z(), poi.yaw(), poi.pitch());

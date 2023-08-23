@@ -4,14 +4,14 @@ import net.pulga22.bulb.core.GameInstance;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-public class TimerRunnable<T extends Plugin> extends BukkitRunnable {
+public class TimerRunnable extends BukkitRunnable {
 
-    private final GameInstance<T> gameInstance;
+    private final Runnable onTimeDone;
     private int timeLeft;
 
-    public TimerRunnable(GameInstance<T> gameInstance) {
-        this.gameInstance = gameInstance;
-        this.timeLeft = gameInstance.getTimeOfGame();
+    public TimerRunnable(int seconds, Runnable onTimeDone) {
+        this.timeLeft = seconds;
+        this.onTimeDone = onTimeDone;
     }
 
     @Override
@@ -23,8 +23,13 @@ public class TimerRunnable<T extends Plugin> extends BukkitRunnable {
         this.timeLeft--;
         if (this.timeLeft <= 0){
             cancel();
-            gameInstance.prepareToEnd();
+            this.onTimeDone.run();
         }
+    }
+
+    public TimerRunnable start(Plugin plugin){
+        this.runTaskTimer(plugin, 0, 20);
+        return this;
     }
 
 }
